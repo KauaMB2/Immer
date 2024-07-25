@@ -1,11 +1,15 @@
-import React, { memo, useCallback, useReducer } from "react";
-import {produce} from "immer";
+import React, { memo, useCallback } from "react";
+import { useImmerReducer } from "use-immer";
 
 // Definindo a interface Task
 interface Task {
   id: string;
   title: string;
   done: boolean;
+}
+interface Action{
+  type: string,
+  id: string
 }
 
 // Definindo a interface para as propriedades do componente Todo
@@ -15,8 +19,8 @@ interface TodoProps {
 }
 
 export default function App(){
-  const [todos, dispatch] = useReducer(
-    produce((draft, action) => {
+  const [todos, dispatch] = useImmerReducer(
+    (draft, action:Action) => {
       switch (action.type) {
         case "toggle":
           const todo = draft.find((todo:Task) => todo.id === action.id);
@@ -34,7 +38,7 @@ export default function App(){
         default:
           break;
       }
-    }),
+    },
     [
       {
         id: "React",
@@ -48,7 +52,7 @@ export default function App(){
       }
     ]
   );
-  const unfinishedTodoCount = todos.filter((todo:Task) => todo.done === false)
+  const unfinishedTodoCount = todos.filter((todo) => todo.done === false)
     .length;
 
   const handleToggle = useCallback((id:string) => {
@@ -56,14 +60,14 @@ export default function App(){
       type: "toggle",
       id:id
     });
-  }, []);
+  }, [dispatch]);
 
   const handleAdd = useCallback(() => {
     dispatch({
       type: "add",
       id: "todo_" + Math.random()
     });
-  }, []);
+  }, [dispatch]);
 
   return (
     <div>
