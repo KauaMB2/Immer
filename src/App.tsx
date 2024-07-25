@@ -1,49 +1,78 @@
+import React, { memo, useCallback, useState } from "react";
 import {produce} from "immer";
 
-interface ObjProps {
-  prop: string,
-    obj2:{
-      prop:string,
-      obj3:{
-        prop: string,
-        value: number
-      }
-    }
+// Definindo a interface Task
+interface Task {
+  id: string;
+  title: string;
+  done: boolean;
+}
+
+// Definindo a interface para as propriedades do componente Todo
+interface TodoProps {
+  todo: Task;
+  onToggle: (id: string) => void;
 }
 
 export default function App(){
-  const obj={
-    prop: "value",
-    obj2:{
-      prop:"value2",
-      obj3:{
-        prop: "value3",
-        value: 1
-      }
-    }
-  }
-  // const objCopy={
-  //   ...obj,
-  //   obj2:{
-  //     ...obj.obj2,
-  //     obj3:{
-  //       ...obj.obj2.obj3,
-  //       value: Math.random()
-  //     }
-  //   }
-  // }
-  const handleClick=()=>{
-    console.log(obj, produce<ObjProps>(obj, (draft:ObjProps)=>{
-      draft.obj2.obj3.value=Math.random()
-    }))
-  }
+  const [todos, setTodos] = useState<Task[]>([
+    {
+      id: "React",
+      title: "Learn React",
+      done: true,
+    },
+    {
+      id: "Immer",
+      title: "Try immer",
+      done: false,
+    },
+  ]);
+  const unfinishedTodoCount = todos.filter((todo) => !todo.done).length;
+
+  const handleToggle = useCallback((id: string) => {
+    setTodos(
+      produce((draft: Task[]) => {
+        const todo = draft.find((todo) => todo.id === id);
+        if (todo) {
+          todo.done = !todo.done;
+        }
+      })
+    );
+  }, []);
+
+  const handleAdd = useCallback(() => {
+    setTodos(
+      produce((draft: Task[]) => {
+        draft.push({
+          id: "todo_" + Math.random(),
+          title: "A new todo",
+          done: false,
+        });
+      })
+    );
+  }, []);
+
   return (
-    <>
-    <h1>Olhe no console!!!!!!</h1>
     <div>
-      <button onClick={handleClick}>Clique aqui</button>
+      <button onClick={handleAdd}>Add Todo</button>
+      <ul>
+        {todos.map((todo) => (
+          <Todo todo={todo} key={todo.id} onToggle={handleToggle} />
+        ))}
+      </ul>
+      Tasks left: {unfinishedTodoCount}
     </div>
-    </>
   );
 };
+
+const Todo: React.FC<TodoProps> = memo(({ todo, onToggle }) => (
+  <li>
+    <input
+      type="checkbox"
+      checked={todo.done}
+      onClick={() => onToggle(todo.id)}
+    />
+    {todo.title}
+  </li>
+));
 
