@@ -1,5 +1,5 @@
-import React, { memo, useCallback } from "react";
-import { useImmer } from "use-immer";
+import React, { memo, useCallback, useReducer } from "react";
+import {produce} from "immer";
 
 // Definindo a interface Task
 interface Task {
@@ -15,44 +15,61 @@ interface TodoProps {
 }
 
 export default function App(){
-  const [todos, setTodos] = useImmer([
-    {
-      id: "React",
-      title: "Learn React",
-      done: true
-    },
-    {
-      id: "Immer",
-      title: "Try Immer",
-      done: false
-    }
-  ]);
-  const unfinishedTodoCount = todos.filter((todo) => todo.done === false).length;
+  const [todos, dispatch] = useReducer(
+    produce((draft, action) => {
+      switch (action.type) {
+        case "toggle":
+          const todo = draft.find((todo:Task) => todo.id === action.id);
+          if(todo){
+            todo.done = !todo.done;
+          }
+          break;
+        case "add":
+          draft.push({
+            id: action.id,
+            title: "A new todo",
+            done: false
+          });
+          break;
+        default:
+          break;
+      }
+    }),
+    [
+      {
+        id: "React",
+        title: "Learn React",
+        done: true
+      },
+      {
+        id: "Immer",
+        title: "Try immer",
+        done: false
+      }
+    ]
+  );
+  const unfinishedTodoCount = todos.filter((todo:Task) => todo.done === false)
+    .length;
 
   const handleToggle = useCallback((id:string) => {
-    setTodos((draft:Task[]) => {
-      const todo = draft.find((todo) => todo.id === id);
-      if(todo){
-        todo.done = !todo.done;
-      }
+    dispatch({
+      type: "toggle",
+      id:id
     });
-  }, [setTodos]);
+  }, []);
 
   const handleAdd = useCallback(() => {
-    setTodos((draft) => {
-      draft.push({
-        id: "todo_" + Math.random(),
-        title: "A new todo",
-        done: false
-      });
+    dispatch({
+      type: "add",
+      id: "todo_" + Math.random()
     });
-  }, [setTodos]);
+  }, []);
 
   return (
     <div>
       <button onClick={handleAdd}>Add Todo</button>
       <ul>
-        {todos.map((todo) => (
+        {todos.map((todo:Task) => (
           <Todo todo={todo} key={todo.id} onToggle={handleToggle} />
         ))}
       </ul>
