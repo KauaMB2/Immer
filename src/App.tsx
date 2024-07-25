@@ -1,5 +1,5 @@
-import React, { memo, useCallback, useState } from "react";
-import {produce} from "immer";
+import React, { memo, useCallback } from "react";
+import { useImmer } from "use-immer";
 
 // Definindo a interface Task
 interface Task {
@@ -15,42 +15,38 @@ interface TodoProps {
 }
 
 export default function App(){
-  const [todos, setTodos] = useState<Task[]>([
+  const [todos, setTodos] = useImmer([
     {
       id: "React",
       title: "Learn React",
-      done: true,
+      done: true
     },
     {
       id: "Immer",
-      title: "Try immer",
-      done: false,
-    },
+      title: "Try Immer",
+      done: false
+    }
   ]);
-  const unfinishedTodoCount = todos.filter((todo) => !todo.done).length;
+  const unfinishedTodoCount = todos.filter((todo) => todo.done === false).length;
 
-  const handleToggle = useCallback((id: string) => {
-    setTodos(
-      produce((draft: Task[]) => {
-        const todo = draft.find((todo) => todo.id === id);
-        if (todo) {
-          todo.done = !todo.done;
-        }
-      })
-    );
-  }, []);
+  const handleToggle = useCallback((id:string) => {
+    setTodos((draft:Task[]) => {
+      const todo = draft.find((todo) => todo.id === id);
+      if(todo){
+        todo.done = !todo.done;
+      }
+    });
+  }, [setTodos]);
 
   const handleAdd = useCallback(() => {
-    setTodos(
-      produce((draft: Task[]) => {
-        draft.push({
-          id: "todo_" + Math.random(),
-          title: "A new todo",
-          done: false,
-        });
-      })
-    );
-  }, []);
+    setTodos((draft) => {
+      draft.push({
+        id: "todo_" + Math.random(),
+        title: "A new todo",
+        done: false
+      });
+    });
+  }, [setTodos]);
 
   return (
     <div>
