@@ -1,26 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {produce} from "immer";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+interface ObjProps {
+  prop: string,
+    obj2:{
+      prop:string,
+      obj3:{
+        prop: string,
+        value: number
+      }
+    }
 }
 
-export default App;
+export default function App(){
+  const obj={
+    prop: "value",
+    obj2:{
+      prop:"value2",
+      obj3:{
+        prop: "value3",
+        value: 1
+      }
+    }
+  }
+  // const objCopy={
+  //   ...obj,
+  //   obj2:{
+  //     ...obj.obj2,
+  //     obj3:{
+  //       ...obj.obj2.obj3,
+  //       value: Math.random()
+  //     }
+  //   }
+  // }
+  const handleClick=()=>{
+    console.log(obj, produce<ObjProps>(obj, (draft:ObjProps)=>{
+      draft.obj2.obj3.value=Math.random()
+    }))
+  }
+  return (
+    <>
+    <h1>Olhe no console!!!!!!</h1>
+    <div>
+      <button onClick={handleClick}>Clique aqui</button>
+    </div>
+    </>
+  );
+};
+
