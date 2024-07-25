@@ -52,8 +52,7 @@ export default function App(){
       }
     ]
   );
-  const unfinishedTodoCount = todos.filter((todo) => todo.done === false)
-    .length;
+  const unfinishedTodoCount = todos.filter((todo) => todo.done === false).length;
 
   const handleToggle = useCallback((id:string) => {
     dispatch({
